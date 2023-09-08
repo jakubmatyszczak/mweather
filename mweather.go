@@ -45,6 +45,7 @@ func callAPI(api API, data map[string]string) ([]byte, error){
 }
 
 func getSkyCondFromWeatherCode(code int) string{
+    // According to https://open-meteo.com/en/docs
     if (code == 0){
         return "Clear"
     }
@@ -90,6 +91,30 @@ func getSkyCondFromWeatherCode(code int) string{
     return "Unknown"
 }
 
+func getWindFeelFromWindspeed(speed float64) string {
+    // According to Beaufort scale entry on wikipedia
+    if(speed < 1.0){
+        return "Calm"
+    }
+    if(speed < 19.0){
+        return "Breeze"
+    }
+    if(speed < 38.0){
+        return "Medium"
+    }
+    if(speed < 61.0){
+        return "Strong"
+    }
+    if(speed < 102.0){
+        return "Storm"
+    }
+    if(speed < 117.0){
+        return "Violent Storm"
+    }
+    return "Hurricane"
+}
+
+
 func main (){
     jsonBytes, err := callAPI(GeoCode, map[string]string{"city":"poznan"})
     if(err != nil){
@@ -112,7 +137,7 @@ func main (){
     log.Println(current)
     temperature := current["temperature"].(float64)
     windspeed := current["windspeed"].(float64)
-    windCategoty := "Breeze"
+    windCategoty := getWindFeelFromWindspeed(windspeed)
     skyCondition := getSkyCondFromWeatherCode(int(current["weathercode"].(float64)))
 
     fmt.Println(cityName, ": ", temperature, "°C, Sky:", skyCondition ,", wind:", windspeed, "km/h (",
