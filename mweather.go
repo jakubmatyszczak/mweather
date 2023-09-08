@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -43,6 +44,52 @@ func callAPI(api API, data map[string]string) ([]byte, error){
     return responseBody, nil
 }
 
+func getSkyCondFromWeatherCode(code int) string{
+    if (code == 0){
+        return "Clear"
+    }
+    if(code <= 3){
+        return "Partly cloudy"
+    }
+    if(code <= 48){
+        return "Foggy"
+    }
+    if(code <= 55){
+        return "Drizzle"
+    }
+    if(code <= 57){
+        return "Freezeing Drizzle"
+    }
+    if(code <= 63){
+        return "Rain"
+    }
+    if(code <= 65){
+        return "Heavy Rain"
+    }
+    if(code <= 67){
+        return "Freezing Rain"
+    }
+    if(code <= 77){
+        return "Snow"
+    }
+    if(code <= 81){
+        return "Showers"
+    }
+    if(code <= 82){
+        return "Violent Showers"
+    }
+    if(code <= 86){
+        return "Snow Showers"
+    }
+    if(code <= 95){
+        return "Thunderstorm"
+    }
+    if(code <= 99){
+        return "Thunderstorm with hail"
+    }
+    return "Unknown"
+}
+
 func main (){
     jsonBytes, err := callAPI(GeoCode, map[string]string{"city":"poznan"})
     if(err != nil){
@@ -55,13 +102,20 @@ func main (){
     }
     lat :=  x.(map[string]interface{})["lat"].(string)
     lon :=  x.(map[string]interface{})["lon"].(string)
+    cityName :=  "Poznań"
     jsonBytes, err = callAPI(OpenWeather, map[string]string{"lat":lat, "lon":lon})
     if(err != nil){
         log.Fatal(nil)
     }
     json.Unmarshal(jsonBytes, &x)
     current := x.(map[string]interface{})["current_weather"].(map[string]interface{})
+    log.Println(current)
     temperature := current["temperature"].(float64)
-    log.Println("weather:", temperature)
+    windspeed := current["windspeed"].(float64)
+    windCategoty := "Breeze"
+    skyCondition := getSkyCondFromWeatherCode(int(current["weathercode"].(float64)))
+
+    fmt.Println(cityName, ": ", temperature, "°C, Sky:", skyCondition ,", wind:", windspeed, "km/h (",
+        windCategoty, "), ")
 }
 
