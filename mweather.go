@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 type API int64
@@ -134,13 +135,13 @@ func main (){
     }
     json.Unmarshal(jsonBytes, &x)
     current := x.(map[string]interface{})["current_weather"].(map[string]interface{})
-    log.Println(current)
+
     temperature := current["temperature"].(float64)
     windspeed := current["windspeed"].(float64)
     windCategoty := getWindFeelFromWindspeed(windspeed)
     skyCondition := getSkyCondFromWeatherCode(int(current["weathercode"].(float64)))
-
-    fmt.Println(cityName, ": ", temperature, "°C, Sky:", skyCondition ,", wind:", windspeed, "km/h (",
-        windCategoty, "), ")
+    fmt.Print("\r", cityName, " " , time.Now().Format("Monday January 02 - 15:04 - "))
+    fmt.Print(" ", temperature, "°C, ", skyCondition ,", Wind:", windspeed, "km/h (",
+        windCategoty, ")\n\r")
 }
 
